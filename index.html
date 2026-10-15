@@ -52,7 +52,7 @@ nav b{font-size:17px}
 </head>
 <body>
 <header><h1 id="ttl">وظيفتي</h1>
-<div class="sr" id="sr"><input id="q" type="search" placeholder="ابحث بالمسمى أو الشركة أو المهارة" aria-label="بحث"></div></header>
+<div class="sr" id="sr"><input id="q" type="search" placeholder="مثال: developer in Jeddah" aria-label="بحث"></div></header>
 <div id="chips" class="chips"></div>
 <main id="main"></main>
 <div id="bulkw"></div>
@@ -81,7 +81,7 @@ const url=x.url||x.link||x.job_apply_link||"";let h=0;for(const ch of t+c+url)h=
 const dt=x.date||x.job_posted_at_datetime_utc;const d=dt?Math.max(0,Math.round((Date.now()-new Date(dt))/864e5)):0;
 return{id:Math.abs(h)+1000,t,c,city:x.city||x.job_city||x.location||"—",type:x.type||x.job_employment_type||"—",mode:x.mode||(x.job_is_remote?"عن بعد":"حضوري"),tags,src:x.source||x.job_publisher||"—",d,url}}
 async function fetchJobs(q){const c=S.cfg;let r;
-if(c.jobProv==="own"){r=await fetch("https://api.openwebninja.com/jsearch/search?num_pages=1&query="+encodeURIComponent(q),{headers:{"x-api-key":c.jobKey}})}
+if(c.jobProv==="own"){r=await fetch("https://api.openwebninja.com/jsearch/search?num_pages=1&country=sa&query="+encodeURIComponent(q),{headers:{"x-api-key":c.jobKey}})}
 else if(c.jobProv==="custom"){r=await fetch(c.jobUrl.replace("{q}",encodeURIComponent(q)),{headers:c.jobKey?{Authorization:"Bearer "+c.jobKey}:{}})}
 else{r=await fetch("https://jsearch.p.rapidapi.com/search?num_pages=1&query="+encodeURIComponent(q),{headers:{"X-RapidAPI-Key":c.jobKey,"X-RapidAPI-Host":"jsearch.p.rapidapi.com"}})}
 if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json();const a=Array.isArray(d)?d:(d.data||d.jobs||d.results||[]);return a.map(norm).filter(Boolean)}
@@ -111,7 +111,7 @@ if(tab==="jobs"){$("#chips").innerHTML=cities().map(c=>`<button class="chip ${c=
 const q=$("#q").value.trim().toLowerCase();
 let r=J.filter(j=>(city==="الكل"||j.city===city)&&(!q||(j.t+j.c+j.tags.join(" ")).toLowerCase().includes(q)));
 r.sort((a,b)=>(match(b)||0)-(match(a)||0)||a.d-b.d);
-$("#main").innerHTML=(true?`<button class="btn p" id="fx" style="width:100%;margin-bottom:8px">🔄 جلب وظائف حقيقية: ${esc(q||"وظائف السعودية")}</button>`:"")+`<div class="cnt">${r.length} وظيفة${!S.skills.trim()&&r.length?' — أضف مهاراتك في «ملفي» لترتيب الوظائف حسب المطابقة':''}</div>`+list(r,J.length?"لا توجد نتائج. جرّب كلمة أخرى أو مدينة مختلفة.":"لا توجد وظائف بعد. أضف مفتاح الوظائف من «إعدادات» ثم اضغط «جلب وظائف حقيقية».")}
+$("#main").innerHTML=(true?`<button class="btn p" id="fx" style="width:100%;margin-bottom:8px">🔄 جلب وظائف حقيقية: ${esc(q||"jobs in Saudi Arabia")}</button>`:"")+`<div class="cnt">${r.length} وظيفة${!S.skills.trim()&&r.length?' — أضف مهاراتك في «ملفي» لترتيب الوظائف حسب المطابقة':''}</div>`+list(r,J.length?"لا توجد نتائج. جرّب كلمة أخرى أو مدينة مختلفة.":"لا توجد وظائف بعد. أضف مفتاح الوظائف من «إعدادات» ثم اضغط «جلب وظائف حقيقية».")}
 else if(tab==="apps"){const r=Object.keys(S.apps).map(byId).filter(Boolean);
 $("#main").innerHTML=`<div class="cnt">${r.length} طلب مقدَّم</div>`+(r.length?r.map(j=>`<div class="job" style="grid-template-columns:1fr auto"><div><h3>${esc(j.t)}</h3><div class="co">${esc(j.c)} · ${j.city}</div><div class="meta"><span>قُدّم ${esc(S.apps[j.id])}</span>${j.url?`<a class="lk" href="${esc(j.url)}" target="_blank" rel="noopener">فتح رابط الوظيفة</a>`:""}</div></div><span class="st">قيد المراجعة</span></div>`).join(""):`<div class="empty">لم تقدّم على أي وظيفة بعد. حدّد عدة وظائف من الرئيسية وقدّم عليها دفعة واحدة.</div>`)}
 else if(tab==="saved"){$("#main").innerHTML=list(S.saved.map(byId).filter(Boolean),"اضغط ☆ على أي وظيفة لحفظها هنا.")}
@@ -124,39 +124,44 @@ else if(tab==="set"){const c=S.cfg;$("#main").innerHTML=`<label>مصدر الو�
 <div class="row" style="margin-top:8px"><button class="btn s" id="tj" style="flex:1">اختبار الوظائف</button><button class="btn s" id="ta" style="flex:1">اختبار الذكاء</button></div>
 <div class="row" style="margin-top:8px"><button class="btn s" id="clr" style="flex:1">مسح المفاتيح والوظائف المجلوبة</button></div>
 <p class="cnt">المفاتيح تُحفظ في هذا الجهاز فقط. للاستخدام الشخصي، لا تشارك الملف وهو محمّل بمفاتيحك.</p>`}
-else{$("#main").innerHTML=`<label>الاسم</label><input id="pn" value="${esc(S.name)}">
+else{$("#main").innerHTML=`<div id="phb" style="text-align:center;margin:6px 0 4px"></div><input type="file" id="phf" accept="image/*,.heic,.heif,.avif" style="display:none"><label>الاسم</label><input id="pn" value="${esc(S.name)}">
 <label>رقم الجوال</label><input id="pp" inputmode="tel" value="${esc(S.phone)}">
 <label>مهاراتك (افصل بينها بفاصلة)</label><input id="ps" value="${esc(S.skills)}" placeholder="python, excel, مبيعات">
 <label>رسالة التقديم الافتراضية</label><textarea id="pt" rows="5" placeholder="السلام عليكم، أتقدم لوظيفة ...">${esc(S.note)}</textarea>
-<button class="btn p" id="psv" style="width:100%;margin-top:16px">حفظ الملف</button>`}
+<button class="btn p" id="psv" style="width:100%;margin-top:16px">حفظ الملف</button>
+<label style="margin-top:22px">السيرة الذاتية (PDF، Word، صورة، نص)</label>
+<div id="cvl"></div>
+<input type="file" id="cvf" multiple accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.pages,image/*" style="display:none">
+<button class="btn s" id="cva" style="width:100%;margin-top:8px">➕ رفع سيرة ذاتية</button>
+<p class="cnt">تُحفظ السير على هذا الجهاز فقط (حتى 5 ملفات، كل ملف حتى 10 ميجابايت).</p>`}
 bulk()}
-function bulk(){$("#bulkw").innerHTML=tab==="jobs"&&sel.size?`<div class="bulk"><button class="btn" id="bk">قدّم على ${sel.size} وظائف</button></div>`:""}
+function renderPhoto(){const el=$("#phb");if(!el)return;const has=!!S.photo;
+el.innerHTML=`<div style="width:104px;height:104px;border-radius:50%;margin:0 auto 8px;background:var(--pri2);border:2px solid var(--pri);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:44px">${has?`<img src="${S.photo}" alt="الصورة الشخصية" style="width:100%;height:100%;object-fit:cover">`:"👤"}</div><div class="row" style="justify-content:center"><button class="btn s" id="phu">${has?"تغيير الصورة":"📷 رفع صورة شخصية"}</button>${has?'<button class="btn s" id="phd">حذف</button>':""}</div><p class="cnt" style="margin:6px 0 0">تدعم صيغ JPG وPNG وWebP وGIF وBMP وAVIF وSVG. تُحفظ على جهازك فقط.</p>`}
+async function setPhoto(f){if(!f)return;if(!f.type.startsWith("image/")&&!/\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|svg)$/i.test(f.name)){toast("هذا الملف ليس صورة");return}
+if(f.size>20971520){toast("الصورة أكبر من 20 ميجابايت");return}
+try{let b;try{b=await createImageBitmap(f)}catch(e){b=await new Promise((a,r)=>{const i=new Image();i.onload=()=>a(i);i.onerror=()=>r(new Error("decode"));i.src=URL.createObjectURL(f)})}
+const w=b.width||b.naturalWidth,h=b.height||b.naturalHeight,m=Math.min(w,h),Z=360;const c=document.createElement("canvas");c.width=c.height=Z;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,Z,Z);x.drawImage(b,(w-m)/2,(h-m)/2,m,m,0,0,Z,Z);
+S.photo=c.toDataURL("image/jpeg",0.85);save();toast("تم تحديث الصورة")}catch(e){toast(/heic|heif/i.test(f.name+f.type)?"صيغة HEIC غير مدعومة في متصفحك، حوّلها إلى JPG أو PNG ثم ارفعها":"تعذّر قراءة الصورة، جرّب صورة أخرى")}renderPhoto()}
+const DB={o:null,open(){return this.o||(this.o=new Promise((a,b)=>{const r=indexedDB.open("wz-cv",1);r.onupgradeneeded=()=>r.result.createObjectStore("cv",{keyPath:"id"});r.onsuccess=()=>a(r.result);r.onerror=()=>b(r.error)}))},
+async all(){const d=await this.open();return new Promise((a,b)=>{const q=d.transaction("cv").objectStore("cv").getAll();q.onsuccess=()=>a(q.result||[]);q.onerror=()=>b(q.error)})},
+async put(x){const d=await this.open();return new Promise((a,b)=>{const t=d.transaction("cv","readwrite");t.objectStore("cv").put(x);t.oncomplete=a;t.onerror=()=>b(t.error)})},
+async del(id){const d=await this.open();return new Promise((a,b)=>{const t=d.transaction("cv","readwrite");t.objectStore("cv").delete(id);t.oncomplete=a;t.onerror=()=>b(t.error)})}};
+const CVX=["pdf","doc","docx","txt","rtf","odt","pages","jpg","jpeg","png","webp","heic","gif"];
+function openCV(c){const u=URL.createObjectURL(c.blob);const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";if(!/pdf|image|text\/plain/.test(c.type))a.download=c.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
+async function addCV(fs){try{let n=(await DB.all()).length;for(const f of fs){const ext=(f.name.split(".").pop()||"").toLowerCase();
+if(!CVX.includes(ext)&&!f.type.startsWith("image/")){toast("نوع غير مدعوم: "+f.name);continue}
+if(f.size>10485760){toast("الملف أكبر من 10 ميجابايت: "+f.name);continue}
+if(n>=5){toast("الحد الأقصى 5 سير ذاتية، احذف واحدة أولًا");break}
+const id=Date.now()+Math.floor(Math.random()*999);await DB.put({id,name:f.name,type:f.type||"application/octet-stream",size:f.size,blob:f,date:new Date().toLocaleDateString("ar-SA")});if(!S.cvId||n===0){S.cvId=id;save()}n++;toast("تم رفع: "+f.name)}}catch(e){toast("تعذّر الحفظ في هذا المتصفح: "+e.message)}renderCV()}
+async function renderCV(){const el=$("#cvl");if(!el)return;let a;try{a=await DB.all()}catch(e){el.innerHTML='<div class="cnt">التخزين غير متاح في هذا المتصفح.</div>';return}
+el.innerHTML=a.length?a.map(c=>`<div class="job" style="grid-template-columns:1fr;margin-top:8px"><div><h3 style="font-size:14px;word-break:break-all">${c.type.startsWith("image/")?"🖼️":"📄"} ${esc(c.name)}</h3><div class="meta"><span>${Math.max(1,Math.round(c.size/1024))} KB</span><span>${esc(c.date)}</span>${S.cvId===c.id?"<span>الافتراضية ✓</span>":""}</div></div><div class="row"><button class="btn s" data-cvo="${c.id}" style="flex:1">فتح</button><button class="btn s" data-cvd="${c.id}" style="flex:1">الافتراضية</button><button class="btn s" data-cvx="${c.id}">حذف</button></div></div>`).join(""):'<div class="cnt">لم ترفع سيرة ذاتية بعد.</div>'}
+async function cvBlock(){const el=$("#cvs");if(!el)return;let c;try{const a=await DB.all();c=a.find(x=>x.id===S.cvId)||a[0]}catch(e){}
+el.innerHTML=c?`<div class="cnt">📎 السيرة الافتراضية: ${esc(c.name)}</div><button class="btn s" id="cvsh" style="width:100%">مشاركة السيرة (واتساب، إيميل...)</button>`:`<div class="cnt">ارفع سيرتك الذاتية من «ملفي» لتجدها هنا جاهزة للإرسال.</div>`;
+if(c&&$("#cvsh"))$("#cvsh").onclick=async()=>{const f=new File([c.blob],c.name,{type:c.type});try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text:$("#mt").value});else openCV(c)}catch(e){}}}
+function bulk(){if(tab==="me"){renderCV();renderPhoto()}$("#bulkw").innerHTML=tab==="jobs"&&sel.size?`<div class="bulk"><button class="btn" id="bk">قدّم على ${sel.size} وظائف</button></div>`:""}
 function confirmApply(ids){
 if(!S.name||!S.phone){$("#modal").innerHTML=`<div class="modal"><div class="sheet"><h2>أكمل بياناتك أولًا</h2><label>الاسم</label><input id="mn" value="${esc(S.name)}"><label>رقم الجوال</label><input id="mp" inputmode="tel" value="${esc(S.phone)}"><div class="row" style="margin-top:16px"><button class="btn p" id="mok">متابعة</button><button class="btn s" id="mx">إلغاء</button></div></div></div>`;
 $("#mok").onclick=()=>{S.name=$("#mn").value.trim();S.phone=$("#mp").value.trim();if(!S.name||!S.phone){$("#mn").focus();return}save();confirmApply(ids)};$("#mx").onclick=()=>$("#modal").innerHTML="";return}
 const js=ids.map(byId).filter(Boolean);
 $("#modal").innerHTML=`<div class="modal"><div class="sheet"><h2>تأكيد التقديم</h2><div class="cnt">${js.length} وظيفة بالاسم ${esc(S.name)}</div>${js.map(j=>`<div class="co">• ${esc(j.t)} — ${esc(j.c)}</div>`).join("")}
-<label>رسالة التقديم</label>${S.cfg.aiKey?'<button class="btn s" id="mai" style="width:100%;margin-bottom:6px">✨ اكتب الرسالة بالذكاء الاصطناعي</button>':""}<textarea id="mt" rows="4">${esc(S.note||"السلام عليكم، أتقدم لهذه الوظيفة وأرى أن خبرتي تناسب متطلباتها. أرجو التواصل معي.")}</textarea>
-<div class="row" style="margin-top:14px"><button class="btn p" id="mok">إرسال الطلبات</button><button class="btn s" id="mx">إلغاء</button></div></div></div>`;
-$("#mx").onclick=()=>$("#modal").innerHTML="";
-if($("#mai"))$("#mai").onclick=async()=>{const b=$("#mai");b.textContent="جاري الكتابة...";try{$("#mt").value=await ai("اكتب رسالة تقديم وظيفي قصيرة وراقية بالعربية (5 أسطر كحد أقصى، بدون عناوين) تصلح للوظائف التالية: "+js.map(j=>j.t+" في "+j.c).join("، ")+". اسمي "+S.name+" ومهاراتي: "+(S.skills||"غير محددة")+".")}catch(e){toast("تعذّر الكتابة: "+e.message+NETERR)}b.textContent="✨ اكتب الرسالة بالذكاء الاصطناعي"};
-$("#mok").onclick=()=>{const d=new Date().toLocaleDateString("ar-SA");js.forEach(j=>{S.apps[j.id]=d;S.known[j.id]=j});S.note=$("#mt").value;try{navigator.clipboard.writeText(S.note)}catch(e){}save();sel.clear();$("#modal").innerHTML="";if(js.some(j=>j.url))toast("تم التسجيل. افتح رابط كل وظيفة من «طلباتي» والصق الرسالة (نُسخت لجهازك)");render()}}
-document.addEventListener("click",e=>{const t=e.target.closest("[data-t],[data-city],[data-ap],[data-sv],#bk,#psv,#fx,#ssv,#tj,#ta,#clr");if(!t)return;
-if(t.dataset.t){tab=t.dataset.t;render()}
-else if(t.dataset.city){city=t.dataset.city;render()}
-else if(t.dataset.ap)confirmApply([+t.dataset.ap]);
-else if(t.dataset.sv){const i=+t.dataset.sv;S.known[i]=byId(i);S.saved=S.saved.includes(i)?S.saved.filter(x=>x!==i):[...S.saved,i];save();render()}
-else if(t.id==="bk")confirmApply([...sel]);
-else if(t.id==="fx"){if(!S.cfg.jobKey&&!S.cfg.jobUrl){toast("مفتاح الوظائف غير محفوظ. افتح «إعدادات» والصقه ثم احفظ");return}t.textContent="جاري الجلب...";fetchJobs($("#q").value.trim()||"وظائف السعودية").then(a=>{if(!a.length)throw new Error("لا نتائج");S.live=a;J=a;city="الكل";sel.clear();save();render()}).catch(e=>{toast("تعذّر الجلب: "+e.message+NETERR);render()})}
-else if(t.id==="ssv"||t.id==="tj"||t.id==="ta"){S.cfg={jobProv:$("#jp").value,jobKey:$("#jk").value.trim(),jobUrl:$("#ju").value.trim(),aiProv:$("#ap").value,aiKey:$("#ak").value.trim()};if(!S.cfg.jobKey&&/^ak_/.test(S.cfg.aiKey)){S.cfg.jobKey=S.cfg.aiKey;S.cfg.aiKey=""}save();
-if(t.id==="ssv"){toast(S.cfg.jobKey?"تم حفظ الإعدادات ✅ مفتاح الوظائف محفوظ":"تم الحفظ، لكن مفتاح الوظائف فاضي");render()}
-else if(t.id==="tj")fetchJobs("developer").then(a=>toast("نجح الاتصال: "+a.length+" وظيفة")).catch(e=>toast("فشل: "+e.message+NETERR));
-else ai("قل: مرحبا").then(x=>toast("نجح الاتصال: "+x.slice(0,40))).catch(e=>toast("فشل: "+e.message+NETERR))}
-else if(t.id==="clr"){S.cfg={};S.live=[];J=SAMPLE;save();render();toast("تم مسح المفاتيح والوظائف المجلوبة")}
-else if(t.id==="psv"){S.name=$("#pn").value.trim();S.phone=$("#pp").value.trim();S.skills=$("#ps").value;S.note=$("#pt").value;save();t.textContent="✓ تم الحفظ";setTimeout(()=>t.textContent="حفظ الملف",1500)}});
-document.addEventListener("change",e=>{const i=e.target.dataset.sel;if(i===undefined)return;e.target.checked?sel.add(+i):sel.delete(+i);render()});
-$("#q").addEventListener("input",render);
-render();
-</script>
-</body>
-</html>
+<div id="cvs"></div><label>رسالة التقديم</label>${S.cfg.
