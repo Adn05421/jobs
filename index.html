@@ -102,7 +102,8 @@ ${ap?'<span></span>':`<input type="checkbox" aria-label="تحديد" data-sel="$
 <div class="row">${ap?`<button class="btn done">✓ تم التقديم</button>`:`<button class="btn p" data-ap="${j.id}">قدّم الآن</button>`}
 <button class="btn s" data-sv="${j.id}" aria-label="حفظ">${sv?'★':'☆'}</button></div></div>`}
 function list(arr,empty){return arr.length?arr.map(card).join(""):`<div class="empty">${empty}</div>`}
-  function render(){
+
+function render(){
 document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===tab));
 $("#sr").style.display=tab==="jobs"?"flex":"none";
 $("#ttl").textContent={jobs:"وظيفتي",apps:"طلباتي",saved:"المحفوظة",me:"ملفي",set:"الإعدادات"}[tab];
@@ -125,6 +126,16 @@ else if(tab==="set"){const c=S.cfg;$("#main").innerHTML=`<label>مصدر الو�
 <div class="row" style="margin-top:8px"><button class="btn s" id="clr" style="flex:1">مسح المفاتيح والوظائف المجلوبة</button></div>
 <p class="cnt">المفاتيح تُحفظ في هذا الجهاز فقط. للاستخدام الشخصي، لا تشارك الملف وهو محمّل بمفاتيحك.</p>`}
 else{$("#main").innerHTML=`<div id="phb" style="text-align:center;margin:6px 0 4px"></div><input type="file" id="phf" accept="image/*,.heic,.heif,.avif" style="display:none"><label>الاسم</label><input id="pn" value="${esc(S.name)}">
+<label>رقم الجوال</label><input id="pp" inputmode="tel" value="${esc(S.phone)}">
+<label>مهاراتك (افصل بينها بفاصلة)</label><input id="ps" value="${esc(S.skills)}" placeholder="python, excel, مبيعات">
+<label>رسالة التقديم الافتراضية</label><textarea id="pt" rows="5" placeholder="السلام عليكم، أتقدم لوظيفة ...">${esc(S.note)}</textarea>
+<button class="btn p" id="psv" style="width:100%;margin-top:16px">حفظ الملف</button>
+<label style="margin-top:22px">السيرة الذاتية (PDF، Word، صورة، نص)</label>
+<div id="cvl"></div>
+<input type="file" id="cvf" multiple accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.pages,image/*" style="display:none">
+<button class="btn s" id="cva" style="width:100%;margin-top:8px">➕ رفع سيرة ذاتية</button>
+<p class="cnt">تُحفظ السير على هذا الجهاز فقط (حتى 5 ملفات، كل ملف حتى 10 ميجابايت).</p>`}
+bulk()}
 function renderPhoto(){const el=$("#phb");if(!el)return;const has=!!S.photo;
 el.innerHTML=`<div style="width:104px;height:104px;border-radius:50%;margin:0 auto 8px;background:var(--pri2);border:2px solid var(--pri);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:44px">${has?`<img src="${S.photo}" alt="الصورة الشخصية" style="width:100%;height:100%;object-fit:cover">`:"👤"}</div><div class="row" style="justify-content:center"><button class="btn s" id="phu">${has?"تغيير الصورة":"📷 رفع صورة شخصية"}</button>${has?'<button class="btn s" id="phd">حذف</button>':""}</div><p class="cnt" style="margin:6px 0 0">تدعم صيغ JPG وPNG وWebP وGIF وBMP وAVIF وSVG. تُحفظ على جهازك فقط.</p>`}
 async function setPhoto(f){if(!f)return;if(!f.type.startsWith("image/")&&!/\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|svg)$/i.test(f.name)){toast("هذا الملف ليس صورة");return}
@@ -148,52 +159,10 @@ el.innerHTML=a.length?a.map(c=>`<div class="job" style="grid-template-columns:1f
 async function cvBlock(){const el=$("#cvs");if(!el)return;let c;try{const a=await DB.all();c=a.find(x=>x.id===S.cvId)||a[0]}catch(e){}
 el.innerHTML=c?`<div class="cnt">📎 السيرة الافتراضية: ${esc(c.name)}</div><button class="btn s" id="cvsh" style="width:100%">مشاركة السيرة (واتساب، إيميل...)</button>`:`<div class="cnt">ارفع سيرتك الذاتية من «ملفي» لتجدها هنا جاهزة للإرسال.</div>`;
 if(c&&$("#cvsh"))$("#cvsh").onclick=async()=>{const f=new File([c.blob],c.name,{type:c.type});try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text:$("#mt").value});else openCV(c)}catch(e){}}}
-<label>رقم الجوال</label><input id="pp" inputmode="tel" value="${esc(S.phone)}">
-<label>مهاراتك (افصل بينها بفاصلة)</label><input id="ps" value="${esc(S.skills)}" placeholder="python, excel, مبيعات">
-<label>رسالة التقديم الافتراضية</label><textarea id="pt" rows="5" placeholder="السلام عليكم، أتقدم لوظيفة ...">${esc(S.note)}</textarea>
-<button class="btn p" id="psv" style="width:100%;margin-top:16px">حفظ الملف</button>
-<label style="margin-top:22px">السيرة الذاتية (PDF، Word، صورة، نص)</label>
-<div id="cvl"></div>
-<input type="file" id="cvf" multiple accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.pages,image/*" style="display:none">
-<button class="btn s" id="cva" style="width:100%;margin-top:8px">➕ رفع سيرة ذاتية</button>
-<p class="cnt">تُحفظ السير على هذا الجهاز فقط (حتى 5 ملفات، كل ملف حتى 10 ميجابايت).</p>`}
-bulk()}
 function bulk(){if(tab==="me"){renderCV();renderPhoto()}$("#bulkw").innerHTML=tab==="jobs"&&sel.size?`<div class="bulk"><button class="btn" id="bk">قدّم على ${sel.size} وظائف</button></div>`:""}
 function confirmApply(ids){
 if(!S.name||!S.phone){$("#modal").innerHTML=`<div class="modal"><div class="sheet"><h2>أكمل بياناتك أولًا</h2><label>الاسم</label><input id="mn" value="${esc(S.name)}"><label>رقم الجوال</label><input id="mp" inputmode="tel" value="${esc(S.phone)}"><div class="row" style="margin-top:16px"><button class="btn p" id="mok">متابعة</button><button class="btn s" id="mx">إلغاء</button></div></div></div>`;
 $("#mok").onclick=()=>{S.name=$("#mn").value.trim();S.phone=$("#mp").value.trim();if(!S.name||!S.phone){$("#mn").focus();return}save();confirmApply(ids)};$("#mx").onclick=()=>$("#modal").innerHTML="";return}
 const js=ids.map(byId).filter(Boolean);
 $("#modal").innerHTML=`<div class="modal"><div class="sheet"><h2>تأكيد التقديم</h2><div class="cnt">${js.length} وظيفة بالاسم ${esc(S.name)}</div>${js.map(j=>`<div class="co">• ${esc(j.t)} — ${esc(j.c)}</div>`).join("")}
-<div id="cvs"></div><label>رسالة التقديم</label>${S.cfg.aiKey?'<button class="btn s" id="mai" style="width:100%;margin-bottom:6px">✨ اكتب الرسالة بالذكاء الاصطناعي</button>':""}<textarea id="mt" rows="4">${esc(S.note||"السلام عليكم، أتقدم لهذه الوظيفة وأرى أن خبرتي تناسب متطلباتها. أرجو التواصل معي.")}</textarea>
-<div class="row" style="margin-top:14px"><button class="btn p" id="mok">إرسال الطلبات</button><button class="btn s" id="mx">إلغاء</button></div></div></div>`;
-$("#mx").onclick=()=>$("#modal").innerHTML="";
-cvBlock();
-if($("#mai"))$("#mai").onclick=async()=>{const b=$("#mai");b.textContent="جاري الكتابة...";try{$("#mt").value=await ai("اكتب رسالة تقديم وظيفي قصيرة وراقية بالعربية (5 أسطر كحد أقصى، بدون عناوين) تصلح للوظائف التالية: "+js.map(j=>j.t+" في "+j.c).join("، ")+". اسمي "+S.name+" ومهاراتي: "+(S.skills||"غير محددة")+".")}catch(e){toast("تعذّر الكتابة: "+e.message+NETERR)}b.textContent="✨ اكتب الرسالة بالذكاء الاصطناعي"};
-$("#mok").onclick=()=>{const d=new Date().toLocaleDateString("ar-SA");js.forEach(j=>{S.apps[j.id]=d;S.known[j.id]=j});S.note=$("#mt").value;try{navigator.clipboard.writeText(S.note)}catch(e){}save();sel.clear();$("#modal").innerHTML="";if(js.some(j=>j.url))toast("تم التسجيل. افتح رابط كل وظيفة من «طلباتي» والصق الرسالة (نُسخت لجهازك)");render()}}
-document.addEventListener("click",e=>{const t=e.target.closest("[data-t],[data-city],[data-ap],[data-sv],#bk,#psv,#fx,#ssv,#tj,#ta,#clr,#cva,#phu,#phd,[data-cvo],[data-cvd],[data-cvx]");if(!t)return;
-if(t.dataset.t){tab=t.dataset.t;render()}
-else if(t.dataset.city){city=t.dataset.city;render()}
-else if(t.dataset.ap)confirmApply([+t.dataset.ap]);
-else if(t.dataset.sv){const i=+t.dataset.sv;S.known[i]=byId(i);S.saved=S.saved.includes(i)?S.saved.filter(x=>x!==i):[...S.saved,i];save();render()}
-else if(t.id==="bk")confirmApply([...sel]);
-else if(t.id==="cva")$("#cvf").click();
-else if(t.id==="phu")$("#phf").click();
-else if(t.id==="phd"){S.photo="";save();renderPhoto()}
-else if(t.dataset.cvo||t.dataset.cvd||t.dataset.cvx){const id=+(t.dataset.cvo||t.dataset.cvd||t.dataset.cvx);
-if(t.dataset.cvd){S.cvId=id;save();renderCV()}
-else DB.all().then(a=>{const c=a.find(x=>x.id===id);if(t.dataset.cvo&&c)openCV(c);else if(t.dataset.cvx)return DB.del(id).then(()=>{if(S.cvId===id){S.cvId=null;save()}renderCV()})}).catch(e=>toast("خطأ: "+e.message))}
-else if(t.id==="fx"){if(!S.cfg.jobKey&&!S.cfg.jobUrl){toast("مفتاح الوظائف غير محفوظ. افتح «إعدادات» والصقه ثم احفظ");return}t.textContent="جاري الجلب...";fetchJobs($("#q").value.trim()||"jobs in Saudi Arabia").then(a=>{if(!a.length)throw new Error("لا نتائج");S.live=a;J=a;city="الكل";sel.clear();save();render()}).catch(e=>{toast(e.message==="لا نتائج"?"الاتصال ناجح لكن لا توجد نتائج. جرّب البحث بالإنجليزية مثل: developer in Jeddah":"تعذّر الجلب: "+e.message+NETERR);render()})}
-else if(t.id==="ssv"||t.id==="tj"||t.id==="ta"){S.cfg={jobProv:$("#jp").value,jobKey:$("#jk").value.trim(),jobUrl:$("#ju").value.trim(),aiProv:$("#ap").value,aiKey:$("#ak").value.trim()};if(!S.cfg.jobKey&&/^ak_/.test(S.cfg.aiKey)){S.cfg.jobKey=S.cfg.aiKey;S.cfg.aiKey=""}save();
-if(t.id==="ssv"){toast(S.cfg.jobKey?"تم حفظ الإعدادات ✅ مفتاح الوظائف محفوظ":"تم الحفظ، لكن مفتاح الوظائف فاضي");render()}
-else if(t.id==="tj")fetchJobs("developer").then(a=>toast("نجح الاتصال: "+a.length+" وظيفة")).catch(e=>toast("فشل: "+e.message+NETERR));
-else ai("قل: مرحبا").then(x=>toast("نجح الاتصال: "+x.slice(0,40))).catch(e=>toast("فشل: "+e.message+NETERR))}
-else if(t.id==="clr"){S.cfg={};S.live=[];J=SAMPLE;save();render();toast("تم مسح المفاتيح والوظائف المجلوبة")}
-else if(t.id==="psv"){S.name=$("#pn").value.trim();S.phone=$("#pp").value.trim();S.skills=$("#ps").value;S.note=$("#pt").value;save();t.textContent="✓ تم الحفظ";setTimeout(()=>t.textContent="حفظ الملف",1500)}});
-document.addEventListener("change",e=>{if(e.target.id==="phf"){setPhoto(e.target.files[0]);e.target.value="";return}if(e.target.id==="cvf"){addCV([...e.target.files]);e.target.value="";return}const i=e.target.dataset.sel;if(i===undefined)return;e.target.checked?sel.add(+i):sel.delete(+i);render()});
-$("#q").addEventListener("input",render);
-render();
-</script>
-</body>
-</html>
-  
-  
+<div id="cvs"></div><label>رسالة التقديم</label>${S.cfg
